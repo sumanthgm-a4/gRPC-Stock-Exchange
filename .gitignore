@@ -1,0 +1,9 @@
+*.txt
+
+*/HELP.md
+
+build/
+
+gradle
+
+*.env

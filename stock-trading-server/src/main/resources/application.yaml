@@ -1,0 +1,21 @@
+spring:
+    application:
+        name: stock-trading-server
+    config:
+        import:
+            - optional:file:.env[.properties]
+    datasource:
+        url: jdbc:mysql://localhost:3306/stock_exchange
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.MySQLDialect
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+
+grpc:
+    server:
+        port: ${SERVER_PORT}
+        enable-reflection: true
