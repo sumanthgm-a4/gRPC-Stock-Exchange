@@ -2,7 +2,10 @@ package com.sum.stock_trading_server.service;
 
 import com.sum.stock_trading_server.repository.StockRepository;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.grpc.server.service.GrpcService;
 
@@ -90,5 +93,28 @@ public class StockTradingServiceImpl extends StockTradingServiceImplBase {
 
         responseObserver.onNext(stockResponse);
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void subscribeStock(StockRequest request, StreamObserver<StockResponse> responseObserver) {
+
+        String stockSymbol = request.getStockSymbol();
+
+        // Simulate a stream of 10 StockResponses for each stock
+        try {
+            for (int i = 0; i < 10; i ++) {
+                StockResponse stockResponse = StockResponse.newBuilder()
+                    .setStockSymbol(stockSymbol)
+                    .setPrice(new Random().nextDouble(200))
+                    .setTimestamp(Instant.now().toString())
+                    .build();
+                    
+                responseObserver.onNext(stockResponse);
+
+                TimeUnit.SECONDS.sleep(1);
+            }
+
+            responseObserver.onCompleted();
+        } catch (InterruptedException e) {}
     }
 }
