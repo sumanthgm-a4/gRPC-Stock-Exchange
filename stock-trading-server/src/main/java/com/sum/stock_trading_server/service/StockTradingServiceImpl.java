@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.grpc.server.service.GrpcService;
 
 import com.sum.stock_trading_server.entity.Stock;
+import com.sum.stock_trading_server.grpc.StockOrderRequest;
+import com.sum.stock_trading_server.grpc.StockOrderSummary;
 import com.sum.stock_trading_server.grpc.AddStockRequest;
 import com.sum.stock_trading_server.grpc.Empty;
 import com.sum.stock_trading_server.grpc.StockListResponse;
@@ -117,4 +119,43 @@ public class StockTradingServiceImpl extends StockTradingServiceImplBase {
             responseObserver.onCompleted();
         } catch (InterruptedException e) {}
     }
+
+    @Override
+    public StreamObserver<StockOrderRequest> bulkStockOrder(StreamObserver<StockOrderSummary> responseObserver) {
+
+        return new StreamObserver<StockOrderRequest>() {
+
+            private int totalOrders = 0;
+            private double totalAmount = 0.0D;
+            private int successCount = 0;
+
+            @Override
+            public void onNext(StockOrderRequest value) {
+                totalOrders ++;
+                totalAmount += value.getPrice() * value.getQuantity();
+                successCount ++;
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println(t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                StockOrderSummary summary = StockOrderSummary.newBuilder()
+                        .setTotalOrders(totalOrders)
+                        .setTotalAmount(totalAmount)
+                        .setSuccessCount(successCount)
+                        .build();
+
+                responseObserver.onNext(summary);
+                responseObserver.onCompleted();
+
+                System.out.println("ORDER PLACED : " + summary);
+            }
+            
+        };
+    }
+
 }

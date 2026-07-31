@@ -25,6 +25,20 @@ message AddStockRequest {
 
 message Empty {}
 
+message StockOrderRequest {
+    string order_id = 1;
+    string stock_symbol = 2;
+    int32 quantity = 3;
+    double price = 4;
+    string order_type = 5; // BUY OR SELL
+}
+
+message StockOrderSummary {
+    int32 total_orders = 1;
+    double total_amount = 2;
+    int32 success_count = 3;
+}
+
 service StockTradingService {
     // UNARY METHODS
     // This method fetches current stock service
@@ -44,4 +58,10 @@ service StockTradingService {
     // SERVER STREAMING METHODS
     // Get stock prices
     rpc SubscribeStock(StockRequest) returns (stream StockResponse);
+
+
+
+    // CLIENT STREAMING METHODS
+    // Place Bulk Stock Orders
+    rpc BulkStockOrder(stream StockOrderRequest) returns (StockOrderSummary);
 }

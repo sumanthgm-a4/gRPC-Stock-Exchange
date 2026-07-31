@@ -2,6 +2,8 @@ package com.sum.stock_trading_client.service;
 
 import org.springframework.stereotype.Service;
 
+import com.sum.stock_trading_server.grpc.StockOrderSummary;
+import com.sum.stock_trading_server.grpc.StockOrderRequest;
 import com.sum.stock_trading_server.grpc.AddStockRequest;
 import com.sum.stock_trading_server.grpc.Empty;
 import com.sum.stock_trading_server.grpc.StockListResponse;
@@ -62,5 +64,61 @@ public class StockClientService {
             }
             
         });
+    }
+
+    public void bulkStockOrder() {
+
+        StreamObserver<StockOrderSummary> reponseObserver = new StreamObserver<StockOrderSummary>() {
+
+            @Override
+            public void onNext(StockOrderSummary value) {
+                log.info("Order Summary from server : {}", value);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                log.error(t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                log.info("Stream is completed");
+            }
+            
+        }; 
+
+        StreamObserver<StockOrderRequest> requestObserver = serviceStub.bulkStockOrder(reponseObserver);
+
+        // Send stream of stock order requests
+        try {
+            requestObserver.onNext(StockOrderRequest.newBuilder()
+                    .setOrderId("1")
+                    .setStockSymbol("AAPL")
+                    .setOrderType("Buy")
+                    .setPrice(150.5)
+                    .setQuantity(10)
+                    .build()
+            );
+            requestObserver.onNext(StockOrderRequest.newBuilder()
+                    .setOrderId("2")
+                    .setStockSymbol("GOOGL")
+                    .setOrderType("Buy")
+                    .setPrice(110.5)
+                    .setQuantity(10)
+                    .build()
+            );
+            requestObserver.onNext(StockOrderRequest.newBuilder()
+                    .setOrderId("3")
+                    .setStockSymbol("AMZN")
+                    .setOrderType("Sell")
+                    .setPrice(150.5)
+                    .setQuantity(3)
+                    .build()
+            );
+
+            requestObserver.onCompleted();
+        } catch (Exception ex) {
+            reponseObserver.onError(ex);
+        }
     }
 }

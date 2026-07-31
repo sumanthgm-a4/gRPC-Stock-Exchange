@@ -27,8 +27,9 @@ public class StockTradingClientApplication implements CommandLineRunner {
 				.setStockSymbol("GOOGL")
 				.build();
 
-		log.info("{}", service.getStock(stockRequest));
-		service.subscribeStock(stockRequest);
+		// log.info("{}", service.getStock(stockRequest));
+		// service.subscribeStock(stockRequest);
+		service.bulkStockOrder();
 	}
 
 }
