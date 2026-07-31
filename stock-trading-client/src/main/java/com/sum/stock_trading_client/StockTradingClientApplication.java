@@ -29,7 +29,8 @@ public class StockTradingClientApplication implements CommandLineRunner {
 
 		// log.info("{}", service.getStock(stockRequest));
 		// service.subscribeStock(stockRequest);
-		service.bulkStockOrder();
+		// service.bulkStockOrder();
+		service.startTrading();
 	}
 
 }

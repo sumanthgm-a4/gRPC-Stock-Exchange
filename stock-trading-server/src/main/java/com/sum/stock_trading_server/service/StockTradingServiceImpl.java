@@ -18,6 +18,7 @@ import com.sum.stock_trading_server.grpc.StockListResponse;
 import com.sum.stock_trading_server.grpc.StockRequest;
 import com.sum.stock_trading_server.grpc.StockResponse;
 import com.sum.stock_trading_server.grpc.StockTradingServiceGrpc.StockTradingServiceImplBase;
+import com.sum.stock_trading_server.grpc.TradeStatus;
 
 import io.grpc.stub.StreamObserver;
 
@@ -158,4 +159,43 @@ public class StockTradingServiceImpl extends StockTradingServiceImplBase {
         };
     }
 
+    @Override
+    public StreamObserver<StockOrderRequest> liveTrading(StreamObserver<TradeStatus> responseObserver) {
+        
+        return new StreamObserver<StockOrderRequest>() {
+
+            @Override
+            public void onNext(StockOrderRequest value) {
+                System.out.println("RECEIVED ORDER : " + value);
+
+                String status = "EXECUTED";
+                String message = "Order placed successfully";
+
+                if (value.getQuantity() <= 0) {
+                    status = "FAILED";
+                    message = "Invalid Quantity";
+                }
+
+                TradeStatus tradeStatus = TradeStatus.newBuilder()
+                        .setOrderId(value.getOrderId())
+                        .setStatus(status)
+                        .setMessage(message)
+                        .setTimestamp(Instant.now().toString())
+                        .build();
+
+                responseObserver.onNext(tradeStatus);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                responseObserver.onError(t);
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
+            }
+        };
+    }
+    
 }

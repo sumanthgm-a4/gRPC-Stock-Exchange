@@ -39,6 +39,13 @@ message StockOrderSummary {
     int32 success_count = 3;
 }
 
+message TradeStatus {
+    string order_id = 1;
+    string status = 2;      // executed, failed or pending
+    string message = 3;
+    string timestamp = 4;   // Creation timestamp
+}
+
 service StockTradingService {
     // UNARY METHODS
     // This method fetches current stock service
@@ -64,4 +71,10 @@ service StockTradingService {
     // CLIENT STREAMING METHODS
     // Place Bulk Stock Orders
     rpc BulkStockOrder(stream StockOrderRequest) returns (StockOrderSummary);
+
+
+
+    // BIDIRECTIONAL METHODS
+    // Live trading
+    rpc LiveTrading(stream StockOrderRequest) returns (stream TradeStatus);
 }

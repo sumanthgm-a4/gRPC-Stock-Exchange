@@ -1,11 +1,14 @@
 package com.sum.stock_trading_client.service;
 
+import java.time.Duration;
+
 import org.springframework.stereotype.Service;
 
 import com.sum.stock_trading_server.grpc.StockOrderSummary;
 import com.sum.stock_trading_server.grpc.StockOrderRequest;
 import com.sum.stock_trading_server.grpc.AddStockRequest;
 import com.sum.stock_trading_server.grpc.Empty;
+import com.sum.stock_trading_server.grpc.TradeStatus;
 import com.sum.stock_trading_server.grpc.StockListResponse;
 import com.sum.stock_trading_server.grpc.StockRequest;
 import com.sum.stock_trading_server.grpc.StockResponse;
@@ -120,5 +123,39 @@ public class StockClientService {
         } catch (Exception ex) {
             reponseObserver.onError(ex);
         }
+    }
+
+    public void startTrading() throws InterruptedException {
+        StreamObserver<StockOrderRequest> requestObserver = serviceStub.liveTrading(new StreamObserver<>() {
+        
+                @Override
+                public void onNext(TradeStatus value) {
+                    System.out.println("Server Response: " + value);
+                }
+    
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println(t.getMessage());
+                }
+    
+                @Override
+                public void onCompleted() {
+                    System.out.println("Stream completed");
+                }
+            });
+
+        for (int i = 0; i < 10; i ++) {
+            StockOrderRequest request = StockOrderRequest.newBuilder()
+                    .setOrderId("ORDER-" + i)
+                    .setStockSymbol("AAPL")
+                    .setQuantity(i * 10)
+                    .setPrice(150.0 + i)
+                    .setOrderType("Sell")
+                    .build();
+
+            requestObserver.onNext(request);
+            Thread.sleep(1);
+        }
+        requestObserver.onCompleted();
     }
 }
